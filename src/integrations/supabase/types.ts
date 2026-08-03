@@ -14,7 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      vehiculos: {
+        Row: {
+          anio: number
+          caja: string
+          cilindrada: string | null
+          color: string | null
+          combustible: string
+          consumo: string | null
+          created_at: string
+          destacado: boolean
+          equipamiento: string[]
+          estado: string
+          galeria: string[]
+          garantia: string | null
+          id: string
+          imagen_url: string | null
+          km: number
+          marca: string
+          modelo: string
+          potencia_hp: number | null
+          precio: number
+          precio_contado: number | null
+          precio_financiado: number | null
+          publicado: boolean
+          slug: string
+          tipo: string
+          tipo_motor: string | null
+          torque_nm: number | null
+          traccion: string
+          ubicacion: string
+          updated_at: string
+          version: string | null
+          vistas: number
+        }
+        Insert: {
+          anio: number
+          caja: string
+          cilindrada?: string | null
+          color?: string | null
+          combustible: string
+          consumo?: string | null
+          created_at?: string
+          destacado?: boolean
+          equipamiento?: string[]
+          estado?: string
+          galeria?: string[]
+          garantia?: string | null
+          id?: string
+          imagen_url?: string | null
+          km?: number
+          marca: string
+          modelo: string
+          potencia_hp?: number | null
+          precio: number
+          precio_contado?: number | null
+          precio_financiado?: number | null
+          publicado?: boolean
+          slug: string
+          tipo: string
+          tipo_motor?: string | null
+          torque_nm?: number | null
+          traccion: string
+          ubicacion?: string
+          updated_at?: string
+          version?: string | null
+          vistas?: number
+        }
+        Update: {
+          anio?: number
+          caja?: string
+          cilindrada?: string | null
+          color?: string | null
+          combustible?: string
+          consumo?: string | null
+          created_at?: string
+          destacado?: boolean
+          equipamiento?: string[]
+          estado?: string
+          galeria?: string[]
+          garantia?: string | null
+          id?: string
+          imagen_url?: string | null
+          km?: number
+          marca?: string
+          modelo?: string
+          potencia_hp?: number | null
+          precio?: number
+          precio_contado?: number | null
+          precio_financiado?: number | null
+          publicado?: boolean
+          slug?: string
+          tipo?: string
+          tipo_motor?: string | null
+          torque_nm?: number | null
+          traccion?: string
+          ubicacion?: string
+          updated_at?: string
+          version?: string | null
+          vistas?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
