@@ -18,12 +18,12 @@ export const Route = createFileRoute("/vehiculos/$slug")({
       };
     }
     const nombre = `${titulo(loaderData)} ${loaderData.anio}`;
-    const desc = `${nombre} — ${kilometros(loaderData.km)}, ${loaderData.combustible}, ${loaderData.caja}. ${precio(loaderData.precio)} en Lorenzana Automotores.`;
+    const desc = `${nombre} — ${kilometros(loaderData.km)}, ${loaderData.combustible}, ${loaderData.caja}. ${precio(loaderData.precio)} en Lorena Automotores.`;
     return {
       meta: [
-        { title: `${nombre} | Lorenzana Automotores` },
+        { title: `${nombre} | Lorena Automotores` },
         { name: "description", content: desc },
-        { property: "og:title", content: `${nombre} | Lorenzana Automotores` },
+        { property: "og:title", content: `${nombre} | Lorena Automotores` },
         { property: "og:description", content: desc },
       ],
     };
