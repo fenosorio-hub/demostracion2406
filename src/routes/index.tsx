@@ -8,7 +8,7 @@ import { VehiculoCard } from "@/components/vehiculo-card";
 import { useReveal } from "@/hooks/use-reveal";
 import { vehiculosQuery } from "@/lib/vehiculos";
 
-const TITULO = "Lorenzana Automotores | Vehículos premium seleccionados";
+const TITULO = "Lorena Automotores | Vehículos premium seleccionados";
 const DESC =
   "Concesionaria premium en Buenos Aires: SUV, coupés, sedanes y pickups certificados con garantía escrita, financiación a medida y test drive sin cargo.";
 
@@ -51,7 +51,7 @@ function Hero() {
     >
       <img
         src={heroImg}
-        alt="Coupé deportivo gris en el showroom de Lorenzana Automotores"
+        alt="Coupé deportivo gris en el showroom de Lorena Automotores"
         width={1920}
         height={1088}
         fetchPriority="high"

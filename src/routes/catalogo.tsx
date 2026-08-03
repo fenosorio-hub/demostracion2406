@@ -6,7 +6,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { VehiculoCard } from "@/components/vehiculo-card";
 import { vehiculosQuery, titulo } from "@/lib/vehiculos";
 
-const TITULO = "Catálogo de vehículos | Lorenzana Automotores";
+const TITULO = "Catálogo de vehículos | Lorena Automotores";
 const DESC =
   "Buscá entre SUV, pickups, sedanes, coupés y eléctricos premium con filtros por marca, tipo, combustible, caja y precio. Unidades certificadas con garantía.";
 
