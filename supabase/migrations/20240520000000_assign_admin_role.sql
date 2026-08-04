@@ -2,5 +2,5 @@
 UPDATE public.profiles
 SET role = 'admin'
 WHERE id IN (
-  SELECT id FROM auth.users WHERE email = 'FENOSORIO@gmail.com'
+  SELECT id FROM auth.users WHERE email = 'fenosorio@gmail.com'
 );
