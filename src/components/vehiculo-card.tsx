@@ -2,9 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { Fuel, Gauge, Settings2 } from "lucide-react";
 import { kilometros, precio, titulo, type Vehiculo } from "@/lib/vehiculos";
 import { useReveal } from "@/hooks/use-reveal";
+import { useImagenes } from "@/lib/storage";
 
 export function VehiculoCard({ vehiculo, delay = 0 }: { vehiculo: Vehiculo; delay?: number }) {
   const reveal = useReveal<HTMLDivElement>(delay);
+  const [portada] = useImagenes([vehiculo.imagen_url]);
 
   return (
     <div ref={reveal.ref} className={reveal.className}>
@@ -15,7 +17,7 @@ export function VehiculoCard({ vehiculo, delay = 0 }: { vehiculo: Vehiculo; dela
       >
         <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
           <img
-            src={vehiculo.imagen_url ?? "/images/vehiculos/porsche-911.jpg"}
+            src={portada ?? "/images/vehiculos/porsche-911.jpg"}
             alt={`${titulo(vehiculo)} en venta`}
             loading="lazy"
             width={1280}
@@ -29,6 +31,11 @@ export function VehiculoCard({ vehiculo, delay = 0 }: { vehiculo: Vehiculo; dela
             {vehiculo.destacado && (
               <span className="rounded-full bg-primary px-3 py-1 text-[0.68rem] font-semibold text-primary-foreground">
                 Destacado
+              </span>
+            )}
+            {vehiculo.vendido && (
+              <span className="rounded-full bg-destructive px-3 py-1 text-[0.68rem] font-semibold text-destructive-foreground">
+                Vendido
               </span>
             )}
           </div>

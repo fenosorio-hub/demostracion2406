@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, Check, MapPin, ShieldCheck } from "lucide-react";
 
 import { kilometros, precio, titulo, vehiculoQuery } from "@/lib/vehiculos";
+import { useImagenes } from "@/lib/storage";
 
 export const Route = createFileRoute("/vehiculos/$slug")({
   loader: async ({ context, params }) => {
@@ -63,10 +64,14 @@ function Ficha() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(vehiculoQuery(slug));
   const [zoom, setZoom] = useState(false);
+  const [activa, setActiva] = useState(0);
+  const rutas = data?.galeria?.length ? data.galeria : data?.imagen_url ? [data.imagen_url] : [];
+  const urls = useImagenes(rutas);
   if (!data) return <NoEncontrado />;
 
   const v = data;
-  const galeria = v.galeria.length ? v.galeria : [v.imagen_url ?? ""];
+  const galeria = urls.length ? urls : ["/images/vehiculos/porsche-911.jpg"];
+  const indice = Math.min(activa, galeria.length - 1);
 
   return (
     <article className="mx-auto max-w-7xl px-5 pb-24 pt-28 sm:px-8 sm:pt-36">
@@ -86,13 +91,52 @@ function Ficha() {
             className="block w-full overflow-hidden rounded-3xl border bg-surface-2 shadow-elevated"
           >
             <img
-              src={galeria[0]}
+              src={galeria[indice]}
               alt={`${titulo(v)} ${v.anio} — vista principal`}
               width={1280}
               height={720}
               className={`aspect-[16/10] w-full object-cover transition-transform duration-700 ${zoom ? "scale-150" : "scale-100"}`}
             />
           </button>
+
+          {galeria.length > 1 && (
+            <ul className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-6">
+              {galeria.map((src, i) => (
+                <li key={src}>
+                  <button
+                    type="button"
+                    onClick={() => setActiva(i)}
+                    className={`block w-full overflow-hidden rounded-xl border transition-colors ${i === indice ? "border-primary" : "hover:border-primary/40"}`}
+                  >
+                    <img src={src} alt={`${titulo(v)} — imagen ${i + 1}`} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {v.descripcion && (
+            <section className="mt-10">
+              <h2 className="text-xl font-semibold">Descripción</h2>
+              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {v.descripcion}
+              </p>
+            </section>
+          )}
+
+          {v.video_url && (
+            <section className="mt-10">
+              <h2 className="text-xl font-semibold">Video</h2>
+              <a
+                href={v.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Ver video del vehículo →
+              </a>
+            </section>
+          )}
 
           <dl className="mt-10 grid gap-x-10 sm:grid-cols-2">
             <Dato label="Marca" valor={v.marca} />
@@ -131,6 +175,11 @@ function Ficha() {
             <p className="text-xs uppercase tracking-[0.28em] text-primary">
               {v.estado} · {v.anio}
             </p>
+            {v.vendido && (
+              <p className="mt-3 inline-flex rounded-full bg-destructive px-3 py-1 text-[0.68rem] font-semibold text-destructive-foreground">
+                Vendido
+              </p>
+            )}
             <h1 className="mt-3 text-3xl font-semibold leading-tight">{titulo(v)}</h1>
 
             <p className="mt-6 font-display text-4xl font-semibold">{precio(v.precio)}</p>

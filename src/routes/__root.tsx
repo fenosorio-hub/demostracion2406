@@ -8,12 +8,14 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsappFab } from "@/components/whatsapp-fab";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -129,17 +131,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const privado = pathname.startsWith("/admin") || pathname.startsWith("/auth");
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col bg-background">
-        <SiteHeader />
+        {!privado && <SiteHeader />}
         <main className="flex-1">
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </main>
-        <SiteFooter />
-        <WhatsappFab />
+        {!privado && <SiteFooter />}
+        {!privado && <WhatsappFab />}
+        <Toaster position="top-right" />
       </div>
     </QueryClientProvider>
   );
