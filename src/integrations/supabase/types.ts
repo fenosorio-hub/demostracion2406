@@ -44,9 +44,11 @@ export type Database = {
           combustible: string
           consumo: string | null
           created_at: string
+          descripcion: string | null
           destacado: boolean
           equipamiento: string[]
           estado: string
+          fecha_publicacion: string
           galeria: string[]
           garantia: string | null
           id: string
@@ -66,7 +68,9 @@ export type Database = {
           traccion: string
           ubicacion: string
           updated_at: string
+          vendido: boolean
           version: string | null
+          video_url: string | null
           vistas: number
         }
         Insert: {
@@ -77,9 +81,11 @@ export type Database = {
           combustible: string
           consumo?: string | null
           created_at?: string
+          descripcion?: string | null
           destacado?: boolean
           equipamiento?: string[]
           estado?: string
+          fecha_publicacion?: string
           galeria?: string[]
           garantia?: string | null
           id?: string
@@ -99,7 +105,9 @@ export type Database = {
           traccion: string
           ubicacion?: string
           updated_at?: string
+          vendido?: boolean
           version?: string | null
+          video_url?: string | null
           vistas?: number
         }
         Update: {
@@ -110,9 +118,11 @@ export type Database = {
           combustible?: string
           consumo?: string | null
           created_at?: string
+          descripcion?: string | null
           destacado?: boolean
           equipamiento?: string[]
           estado?: string
+          fecha_publicacion?: string
           galeria?: string[]
           garantia?: string | null
           id?: string
@@ -132,7 +142,9 @@ export type Database = {
           traccion?: string
           ubicacion?: string
           updated_at?: string
+          vendido?: boolean
           version?: string | null
+          video_url?: string | null
           vistas?: number
         }
         Relationships: []
