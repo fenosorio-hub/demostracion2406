@@ -9,10 +9,10 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Acceso administradores | Lorena Automotores" },
-      { name: "description", content: "Ingreso privado al panel de gestión de Lorena Automotores." },
+      { title: "Acceso administradores | Stark Automotores" },
+      { name: "description", content: "Ingreso privado al panel de gestión de Stark Automotores." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Acceso administradores | Lorena Automotores" },
+      { property: "og:title", content: "Acceso administradores | Stark Automotores" },
       { property: "og:description", content: "Ingreso privado al panel de gestión." },
     ],
   }),

@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Car, LogOut, Pencil, Plus, Star, Tag, Trash2, Eye, EyeOff } from "lucide-react";
+import { Car, LogOut, Pencil, Plus, Star, Tag, Trash2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useEsAdmin, useSession } from "@/lib/auth";
+import { useSession } from "@/lib/auth";
+import { ETIQUETA_ROL, registrarActividad, useCuenta, type Cuenta } from "@/lib/permisos";
+import { UsuariosPanel } from "@/components/admin/usuarios-panel";
+import { HistorialPanel } from "@/components/admin/historial-panel";
 import { VehiculoForm } from "@/components/admin/vehiculo-form";
 import {
   actualizarVehiculo,
@@ -21,10 +24,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Panel de administración | Lorena Automotores" },
+      { title: "Panel de administración | Stark Automotores" },
       { name: "description", content: "Gestión de vehículos, imágenes y publicación del catálogo." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Panel de administración | Lorena Automotores" },
+      { property: "og:title", content: "Panel de administración | Stark Automotores" },
       { property: "og:description", content: "Gestión interna del catálogo de vehículos." },
     ],
   }),
@@ -41,7 +44,7 @@ function Pantalla({ children }: { children: React.ReactNode }) {
 
 function AdminPage() {
   const { session, cargando } = useSession();
-  const { data: esAdmin, isLoading: cargandoRol } = useEsAdmin(session?.user.id);
+  const { data: cuenta, isLoading: cargandoRol } = useCuenta(session?.user.id);
 
   if (cargando || (session && cargandoRol)) {
     return <Pantalla><p className="text-sm text-muted-foreground">Verificando acceso…</p></Pantalla>;
@@ -59,12 +62,12 @@ function AdminPage() {
     );
   }
 
-  if (!esAdmin) {
+  if (!cuenta || !cuenta.perfil.activo || !cuenta.algunPermiso) {
     return (
       <Pantalla>
         <h1 className="text-3xl font-semibold">Acceso denegado</h1>
         <p className="mt-4 text-sm text-muted-foreground">
-          Tu cuenta no tiene permisos de administrador.
+          Tu cuenta todavía no tiene permisos asignados. Pedile al Super Admin que te habilite el acceso.
         </p>
         <div className="mt-8 flex gap-3">
           <Link to="/" className="rounded-full border px-6 py-3 text-sm font-semibold">Volver al inicio</Link>
@@ -80,7 +83,7 @@ function AdminPage() {
     );
   }
 
-  return <Dashboard email={session.user.email ?? ""} />;
+  return <Dashboard cuenta={cuenta} />;
 }
 
 function Metrica({ label, valor, icon: Icon }: { label: string; valor: string; icon: typeof Car }) {
@@ -95,28 +98,60 @@ function Metrica({ label, valor, icon: Icon }: { label: string; valor: string; i
   );
 }
 
-function Dashboard({ email }: { email: string }) {
+type Pestana = "vehiculos" | "usuarios" | "historial";
+
+function Dashboard({ cuenta }: { cuenta: Cuenta }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: vehiculos = [], isLoading } = useQuery(vehiculosAdminQuery());
   const [editando, setEditando] = useState<Vehiculo | null>(null);
   const [creando, setCreando] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [pestana, setPestana] = useState<Pestana>("vehiculos");
+
+  const puede = cuenta.puede;
+  const gestionaUsuarios = cuenta.esSuperAdmin || puede("usuarios_gestionar");
 
   const refrescar = async () => {
     await qc.invalidateQueries({ queryKey: ["vehiculos-admin"] });
     await qc.invalidateQueries({ queryKey: ["vehiculos"] });
   };
 
+  // Catálogo en tiempo real para todos los administradores conectados.
+  useEffect(() => {
+    const canal = supabase
+      .channel("vehiculos-admin-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "vehiculos" }, () => {
+        void refrescar();
+      })
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(canal);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const toggle = useMutation({
-    mutationFn: ({ v, campo }: { v: Vehiculo; campo: "publicado" | "destacado" | "vendido" }) =>
-      actualizarVehiculo(v.id, { [campo]: !v[campo] }),
+    mutationFn: async ({ v, campo }: { v: Vehiculo; campo: "publicado" | "destacado" | "vendido" }) => {
+      await actualizarVehiculo(v.id, { [campo]: !v[campo] });
+      await registrarActividad(
+        campo === "vendido"
+          ? v.vendido ? "Reactivó un vehículo vendido" : "Marcó un vehículo como vendido"
+          : campo === "publicado"
+            ? v.publicado ? "Ocultó un vehículo" : "Publicó un vehículo"
+            : v.destacado ? "Quitó un destacado" : "Destacó un vehículo",
+        titulo(v),
+      );
+    },
     onSuccess: refrescar,
     onError: (e) => toast.error(e instanceof Error ? e.message : "No se pudo actualizar"),
   });
 
   const borrar = useMutation({
-    mutationFn: (id: string) => eliminarVehiculo(id),
+    mutationFn: async (v: Vehiculo) => {
+      await eliminarVehiculo(v.id);
+      await registrarActividad("Eliminó un vehículo", titulo(v));
+    },
     onSuccess: async () => {
       await refrescar();
       toast.success("Vehículo eliminado");
@@ -165,16 +200,23 @@ function Dashboard({ email }: { email: string }) {
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-primary">Panel</p>
           <h1 className="mt-2 text-3xl font-semibold">Gestión de catálogo</h1>
-          <p className="mt-1 text-xs text-muted-foreground">{email}</p>
+          <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+            {cuenta.perfil.email}
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[0.62rem] text-primary">
+              <ShieldCheck className="size-3" /> {ETIQUETA_ROL[cuenta.perfil.rol]}
+            </span>
+          </p>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setCreando(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-gold"
-          >
-            <Plus className="size-4" /> Nuevo vehículo
-          </button>
+          {puede("vehiculos_crear") && (
+            <button
+              type="button"
+              onClick={() => setCreando(true)}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-gold"
+            >
+              <Plus className="size-4" /> Nuevo vehículo
+            </button>
+          )}
           <button
             type="button"
             onClick={() => void salir()}
@@ -185,12 +227,47 @@ function Dashboard({ email }: { email: string }) {
         </div>
       </header>
 
+      <nav className="mt-8 flex flex-wrap gap-2">
+        {([
+          ["vehiculos", "Vehículos"],
+          ...(gestionaUsuarios ? ([["usuarios", "Usuarios"]] as const) : []),
+          ...(gestionaUsuarios ? ([["historial", "Historial"]] as const) : []),
+        ] as [Pestana, string][]).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setPestana(id)}
+            className={`rounded-full px-5 py-2 text-sm transition-colors ${
+              pestana === id ? "bg-primary text-primary-foreground" : "border text-muted-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {pestana === "usuarios" && gestionaUsuarios && (
+        <div className="mt-10">
+          <UsuariosPanel miId={cuenta.perfil.id} />
+        </div>
+      )}
+
+      {pestana === "historial" && gestionaUsuarios && (
+        <div className="mt-10">
+          <HistorialPanel />
+        </div>
+      )}
+
+      {pestana === "vehiculos" && (
+      <>
+      {(cuenta.esSuperAdmin || puede("panel_estadisticas")) && (
       <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metrica label="Vehículos" valor={String(vehiculos.length)} icon={Car} />
         <Metrica label="Publicados" valor={String(vehiculos.filter((v) => v.publicado).length)} icon={Eye} />
         <Metrica label="Destacados" valor={String(vehiculos.filter((v) => v.destacado).length)} icon={Star} />
         <Metrica label="Valor de stock" valor={precio(valor)} icon={Tag} />
       </section>
+      )}
 
       <div className="mt-10 flex items-center gap-3">
         <input
@@ -238,25 +315,26 @@ function Dashboard({ email }: { email: string }) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1.5">
-                    <button type="button" title="Publicar/ocultar" onClick={() => toggle.mutate({ v, campo: "publicado" })} className="rounded-lg border p-2 hover:border-primary/50">
+                    <button type="button" title="Publicar/ocultar" disabled={!puede("vehiculos_editar")} onClick={() => toggle.mutate({ v, campo: "publicado" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
                       {v.publicado ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                     </button>
-                    <button type="button" title="Destacar" onClick={() => toggle.mutate({ v, campo: "destacado" })} className="rounded-lg border p-2 hover:border-primary/50">
+                    <button type="button" title="Destacar" disabled={!puede("promociones_editar") && !puede("vehiculos_editar")} onClick={() => toggle.mutate({ v, campo: "destacado" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
                       <Star className={`size-3.5 ${v.destacado ? "fill-primary text-primary" : ""}`} />
                     </button>
-                    <button type="button" title="Marcar vendido" onClick={() => toggle.mutate({ v, campo: "vendido" })} className="rounded-lg border p-2 hover:border-primary/50">
+                    <button type="button" title="Marcar vendido" disabled={!puede("vehiculos_vender")} onClick={() => toggle.mutate({ v, campo: "vendido" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
                       <Tag className={`size-3.5 ${v.vendido ? "text-destructive" : ""}`} />
                     </button>
-                    <button type="button" title="Editar" onClick={() => setEditando(v)} className="rounded-lg border p-2 hover:border-primary/50">
+                    <button type="button" title="Editar" disabled={!puede("vehiculos_editar")} onClick={() => setEditando(v)} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
                       <Pencil className="size-3.5" />
                     </button>
                     <button
                       type="button"
                       title="Eliminar"
+                      disabled={!puede("vehiculos_eliminar")}
                       onClick={() => {
-                        if (confirm(`¿Eliminar ${titulo(v)}? Esta acción no se puede deshacer.`)) borrar.mutate(v.id);
+                        if (confirm(`¿Eliminar ${titulo(v)}? Esta acción no se puede deshacer.`)) borrar.mutate(v);
                       }}
-                      className="rounded-lg border p-2 text-destructive hover:border-destructive/50"
+                      className="rounded-lg border p-2 text-destructive hover:border-destructive/50 disabled:opacity-40"
                     >
                       <Trash2 className="size-3.5" />
                     </button>
@@ -267,6 +345,8 @@ function Dashboard({ email }: { email: string }) {
           </tbody>
         </table>
       </div>
+      </>
+      )}
     </div>
   );
 }

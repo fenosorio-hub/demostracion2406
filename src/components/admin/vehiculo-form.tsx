@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { ImagenesUploader } from "@/components/admin/imagenes-uploader";
+import { registrarActividad } from "@/lib/permisos";
 import {
   actualizarVehiculo,
   crearVehiculo,
@@ -153,8 +154,14 @@ export function VehiculoForm({
           slugify(`${f.marca} ${f.modelo} ${f.version} ${f.anio}`) + `-${Date.now().toString(36)}`,
       };
 
-      if (vehiculo) await actualizarVehiculo(vehiculo.id, payload);
-      else await crearVehiculo(payload);
+      const nombre = `${f.marca} ${f.modelo}${f.version ? ` ${f.version}` : ""}`.trim();
+      if (vehiculo) {
+        await actualizarVehiculo(vehiculo.id, payload);
+        await registrarActividad("Editó un vehículo", nombre);
+      } else {
+        await crearVehiculo(payload);
+        await registrarActividad("Creó un vehículo", nombre);
+      }
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["vehiculos-admin"] });
