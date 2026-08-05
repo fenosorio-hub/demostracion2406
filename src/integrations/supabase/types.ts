@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      historial_actividad: {
+        Row: {
+          accion: string
+          created_at: string
+          detalle: string | null
+          elemento: string | null
+          email: string
+          id: string
+          nombre: string | null
+          user_id: string | null
+        }
+        Insert: {
+          accion: string
+          created_at?: string
+          detalle?: string | null
+          elemento?: string | null
+          email: string
+          id?: string
+          nombre?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          accion?: string
+          created_at?: string
+          detalle?: string | null
+          elemento?: string | null
+          email?: string
+          id?: string
+          nombre?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      perfiles: {
+        Row: {
+          activo: boolean
+          created_at: string
+          email: string
+          id: string
+          nombre: string | null
+          rol: Database["public"]["Enums"]["app_rol"]
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          email: string
+          id: string
+          nombre?: string | null
+          rol?: Database["public"]["Enums"]["app_rol"]
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          nombre?: string | null
+          rol?: Database["public"]["Enums"]["app_rol"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      permisos_usuario: {
+        Row: {
+          created_at: string
+          id: string
+          permiso: Database["public"]["Enums"]["app_permission"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permiso: Database["public"]["Enums"]["app_permission"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permiso?: Database["public"]["Enums"]["app_permission"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -154,6 +238,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      asegurar_perfil: {
+        Args: never
+        Returns: {
+          activo: boolean
+          created_at: string
+          email: string
+          id: string
+          nombre: string | null
+          rol: Database["public"]["Enums"]["app_rol"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "perfiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      es_super_admin: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -161,8 +264,37 @@ export type Database = {
         }
         Returns: boolean
       }
+      registrar_actividad: {
+        Args: { _accion: string; _detalle?: string; _elemento?: string }
+        Returns: undefined
+      }
+      tiene_permiso: {
+        Args: {
+          _permiso: Database["public"]["Enums"]["app_permission"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_permission:
+        | "vehiculos_crear"
+        | "vehiculos_editar"
+        | "vehiculos_eliminar"
+        | "vehiculos_vender"
+        | "precios_editar"
+        | "estadisticas_editar"
+        | "promociones_editar"
+        | "imagenes_editar"
+        | "videos_editar"
+        | "textos_editar"
+        | "contacto_editar"
+        | "testdrive_gestionar"
+        | "consultas_gestionar"
+        | "panel_estadisticas"
+        | "usuarios_gestionar"
+        | "acceso_total"
+      app_rol: "super_admin" | "admin" | "empleado"
       app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -291,6 +423,25 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_permission: [
+        "vehiculos_crear",
+        "vehiculos_editar",
+        "vehiculos_eliminar",
+        "vehiculos_vender",
+        "precios_editar",
+        "estadisticas_editar",
+        "promociones_editar",
+        "imagenes_editar",
+        "videos_editar",
+        "textos_editar",
+        "contacto_editar",
+        "testdrive_gestionar",
+        "consultas_gestionar",
+        "panel_estadisticas",
+        "usuarios_gestionar",
+        "acceso_total",
+      ],
+      app_rol: ["super_admin", "admin", "empleado"],
       app_role: ["admin", "moderator", "user"],
     },
   },
