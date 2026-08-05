@@ -62,20 +62,7 @@ function AdminPage() {
     );
   }
 
-  // Comprobación de Super Admin usando las variables reales del proyecto
-  const esSuperAdmin = 
-    session.user.email === 'fenosorio@gmail.com' || 
-    cuenta?.esSuperAdmin || 
-    (cuenta?.perfil?.activo && cuenta?.perfil?.rol === 'super_admin');
-
-  // 1. Definimos la constante con tu excepción por correo
-  const esSuperAdmin = 
-    session.user.email === 'fenosorio@gmail.com' || 
-    cuenta?.esSuperAdmin || 
-    (cuenta?.perfil?.activo && cuenta?.perfil?.rol === 'super_admin');
-
-  // 2. Usamos la condición para bloquear o dejar pasar
-  if (!esSuperAdmin) {
+  if (!cuenta || !cuenta.perfil.activo || !cuenta.algunPermiso) {
     return (
       <Pantalla>
         <h1 className="text-3xl font-semibold">Acceso denegado</h1>
@@ -328,18 +315,46 @@ function Dashboard({ cuenta }: { cuenta: Cuenta }) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1.5">
-                    <button type="button" title="Publicar/ocultar" disabled={!puede("vehiculos_editar")} onClick={() => toggle.mutate({ v, campo: "publicado" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
+                    <button
+                      type="button"
+                      title="Publicar/ocultar"
+                      disabled={!puede("vehiculos_editar")}
+                      onClick={() => toggle.mutate({ v, campo: "publicado" })}
+                      className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40"
+                    >
                       {v.publicado ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                     </button>
-                    <button type="button" title="Destacar" disabled={!puede("promociones_editar") && !puede("vehiculos_editar")} onClick={() => toggle.mutate({ v, campo: "destacado" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
+
+                    <button
+                      type="button"
+                      title="Destacar"
+                      disabled={!puede("promociones_editar") && !puede("vehiculos_editar")}
+                      onClick={() => toggle.mutate({ v, campo: "destacado" })}
+                      className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40"
+                    >
                       <Star className={`size-3.5 ${v.destacado ? "fill-primary text-primary" : ""}`} />
                     </button>
-                    <button type="button" title="Marcar vendido" disabled={!puede("vehiculos_vender")} onClick={() => toggle.mutate({ v, campo: "vendido" })} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
+
+                    <button
+                      type="button"
+                      title="Marcar vendido"
+                      disabled={!puede("vehiculos_vender")}
+                      onClick={() => toggle.mutate({ v, campo: "vendido" })}
+                      className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40"
+                    >
                       <Tag className={`size-3.5 ${v.vendido ? "text-destructive" : ""}`} />
                     </button>
-                    <button type="button" title="Editar" disabled={!puede("vehiculos_editar")} onClick={() => setEditando(v)} className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40">
+
+                    <button
+                      type="button"
+                      title="Editar"
+                      disabled={!puede("vehiculos_editar")}
+                      onClick={() => setEditando(v)}
+                      className="rounded-lg border p-2 hover:border-primary/50 disabled:opacity-40"
+                    >
                       <Pencil className="size-3.5" />
                     </button>
+
                     <button
                       type="button"
                       title="Eliminar"
