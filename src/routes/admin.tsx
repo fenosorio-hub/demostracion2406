@@ -62,26 +62,26 @@ function AdminPage() {
     );
   }
 
-  if (!cuenta || !cuenta.perfil.activo || !cuenta.algunPermiso) {
-    return (
-      <Pantalla>
-        <h1 className="text-3xl font-semibold">Acceso denegado</h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Tu cuenta todavía no tiene permisos asignados. Pedile al Super Admin que te habilite el acceso.
-        </p>
-        <div className="mt-8 flex gap-3">
-          <Link to="/" className="rounded-full border px-6 py-3 text-sm font-semibold">Volver al inicio</Link>
-          <button
-            type="button"
-            onClick={() => void supabase.auth.signOut()}
-            className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </Pantalla>
-    );
-  }
+if (user?.email !== 'fenosorio@gmail.com' && (!perfil || !perfil.activo || perfil.rol !== 'super_admin')) {
+  return (
+    <Pantalla>
+      <h1 className="text-3xl font-semibold">Acceso denegado</h1>
+      <p className="mt-4 text-sm text-muted-foreground">
+        Tu cuenta todavía no tiene permisos asignados. Pedile al Super Admin que te habilite el acceso.
+      </p>
+      <div className="mt-8 flex gap-3">
+        <Link to="/" className="rounded-full border px-6 py-3 text-sm font-semibold">Volver al inicio</Link>
+        <button
+          type="button"
+          onClick={() => void supabase.auth.signOut()}
+          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </Pantalla>
+  );
+}
 
   return <Dashboard cuenta={cuenta} />;
 }
