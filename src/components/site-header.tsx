@@ -29,7 +29,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
         <Link to="/" className="group flex flex-col leading-none">
           <span className="font-display text-lg font-semibold tracking-tight sm:text-xl">
-            LORENA
+            STARK
           </span>
           <span className="text-[0.6rem] tracking-[0.42em] text-muted-foreground">
             AUTOMOTORES

@@ -19,12 +19,12 @@ export const Route = createFileRoute("/vehiculos/$slug")({
       };
     }
     const nombre = `${titulo(loaderData)} ${loaderData.anio}`;
-    const desc = `${nombre} — ${kilometros(loaderData.km)}, ${loaderData.combustible}, ${loaderData.caja}. ${precio(loaderData.precio)} en Lorena Automotores.`;
+    const desc = `${nombre} — ${kilometros(loaderData.km)}, ${loaderData.combustible}, ${loaderData.caja}. ${precio(loaderData.precio)} en Stark Automotores.`;
     return {
       meta: [
-        { title: `${nombre} | Lorena Automotores` },
+        { title: `${nombre} | Stark Automotores` },
         { name: "description", content: desc },
-        { property: "og:title", content: `${nombre} | Lorena Automotores` },
+        { property: "og:title", content: `${nombre} | Stark Automotores` },
         { property: "og:description", content: desc },
       ],
     };

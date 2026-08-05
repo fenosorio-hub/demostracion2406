@@ -21,10 +21,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Panel de administración | Lorena Automotores" },
+      { title: "Panel de administración | Stark Automotores" },
       { name: "description", content: "Gestión de vehículos, imágenes y publicación del catálogo." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Panel de administración | Lorena Automotores" },
+      { property: "og:title", content: "Panel de administración | Stark Automotores" },
       { property: "og:description", content: "Gestión interna del catálogo de vehículos." },
     ],
   }),

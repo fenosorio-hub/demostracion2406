@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
       { name: "description", content: "Drive Elite is a premium website solution for car dealerships, designed to enhance user experience and drive sales." },
-      { name: "author", content: "Lorena Automotores" },
+      { name: "author", content: "Stark Automotores" },
       { property: "og:title", content: "Lovable App" },
       { property: "og:description", content: "Drive Elite is a premium website solution for car dealerships, designed to enhance user experience and drive sales." },
       { property: "og:type", content: "website" },

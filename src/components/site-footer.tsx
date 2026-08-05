@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="border-t bg-surface">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-4">
         <div className="md:col-span-2">
-          <p className="font-display text-xl font-semibold">LORENA</p>
+          <p className="font-display text-xl font-semibold">STARK</p>
           <p className="text-[0.6rem] tracking-[0.42em] text-muted-foreground">AUTOMOTORES</p>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
             Vehículos premium seleccionados uno por uno. Peritaje certificado, garantía escrita y
@@ -55,7 +55,7 @@ export function SiteFooter() {
 
       <div className="border-t">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p>© {new Date().getFullYear()} Lorena Automotores. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Stark Automotores. Todos los derechos reservados.</p>
           <p>Precios expresados en USD. Fotos ilustrativas.</p>
         </div>
       </div>
