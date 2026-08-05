@@ -108,8 +108,8 @@ export function useCuenta(userId: string | undefined) {
 export async function registrarActividad(accion: string, elemento?: string, detalle?: string) {
   const { error } = await supabase.rpc("registrar_actividad", {
     _accion: accion,
-    _elemento: elemento ?? null,
-    _detalle: detalle ?? null,
+    ...(elemento ? { _elemento: elemento } : {}),
+    ...(detalle ? { _detalle: detalle } : {}),
   });
   if (error) console.error("No se pudo registrar la actividad", error);
 }
