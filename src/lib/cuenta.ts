@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
-import { sincronizarCuenta, type CuentaDTO, type Rol } from "./staff.functions";
+import { sincronizarCuenta } from "./staff.functions";
+import type { CuentaDTO, Rol } from "./staff-shared";
 
 export type { CuentaDTO, Rol };
 

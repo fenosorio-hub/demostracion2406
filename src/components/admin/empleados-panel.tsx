@@ -8,8 +8,8 @@ import {
   crearEmpleado,
   eliminarEmpleado,
   listarEmpleados,
-  EMAIL_ADMIN,
 } from "@/lib/staff.functions";
+import { EMAIL_ADMIN } from "@/lib/staff-shared";
 import { ETIQUETA_ROL } from "@/lib/cuenta";
 
 const inputCls =
