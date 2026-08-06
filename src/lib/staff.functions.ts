@@ -57,7 +57,8 @@ export const sincronizarCuenta = createServerFn({ method: "POST" })
     let rol: Rol = (rolActual?.role as Rol | undefined) ?? "empleado";
     if (esAdminFijo) rol = "admin";
     if (!rolActual || rolActual.role !== rol) {
-      await db.from("user_roles").upsert({ user_id: userId, role: rol }, { onConflict: "user_id" });
+      await db.from("user_roles").delete().eq("user_id", userId);
+      await db.from("user_roles").insert({ user_id: userId, role: rol });
     }
 
     return { id: userId, email, nombre, rol };
@@ -127,7 +128,7 @@ export const crearEmpleado = createServerFn({ method: "POST" })
 
     const uid = creado.user.id;
     await db.from("perfiles").upsert({ id: uid, email, nombre }, { onConflict: "id" });
-    await db.from("user_roles").upsert({ user_id: uid, role: "empleado" }, { onConflict: "user_id" });
+    await db.from("user_roles").insert({ user_id: uid, role: "empleado" });
     await registrar(db, { id: context.userId, email: emailActor, nombre: nombreActor }, "Creó un empleado", nombre);
 
     return { id: uid, email, nombre, rol: "empleado", created_at: new Date().toISOString() };
@@ -180,9 +181,6 @@ export const asegurarAdminPorDefecto = createServerFn({ method: "POST" }).handle
     { id: creado.user.id, email: EMAIL_ADMIN, nombre: "Administrador" },
     { onConflict: "id" },
   );
-  await db.from("user_roles").upsert(
-    { user_id: creado.user.id, role: "admin" },
-    { onConflict: "user_id" },
-  );
+  await db.from("user_roles").insert({ user_id: creado.user.id, role: "admin" });
   return { creado: true };
 });
