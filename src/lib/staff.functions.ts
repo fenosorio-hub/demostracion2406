@@ -1,38 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export const EMAIL_ADMIN = "fenosorio@gmail.com";
-export const DOMINIO_EMPLEADOS = "stark.local";
-
-export type Rol = "admin" | "empleado";
-
-export type CuentaDTO = {
-  id: string;
-  email: string;
-  nombre: string;
-  rol: Rol;
-};
-
-export type EmpleadoDTO = CuentaDTO & { created_at: string };
-
-function normalizarNombre(nombre: string): string {
-  return nombre
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/^\.+|\.+$/g, "");
-}
-
-export function emailDeEmpleado(nombre: string): string {
-  return `${normalizarNombre(nombre)}@${DOMINIO_EMPLEADOS}`;
-}
-
-async function admin() {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin;
-}
+import { EMAIL_ADMIN, emailDeEmpleado, type CuentaDTO, type EmpleadoDTO, type Rol } from "./staff-shared";
+import { admin, exigirAdmin, registrar } from "./staff.server";
 
 /** Sincroniza perfil + rol del usuario autenticado y devuelve su cuenta. */
 export const sincronizarCuenta = createServerFn({ method: "POST" })
@@ -63,29 +32,6 @@ export const sincronizarCuenta = createServerFn({ method: "POST" })
 
     return { id: userId, email, nombre, rol };
   });
-
-async function exigirAdmin(userId: string) {
-  const db = await admin();
-  const { data } = await db.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
-  if (data?.role !== "admin") throw new Error("Solo un administrador puede realizar esta acción");
-  const { data: perfil } = await db.from("perfiles").select("email,nombre").eq("id", userId).maybeSingle();
-  return { db, email: perfil?.email ?? "", nombre: perfil?.nombre ?? "" };
-}
-
-async function registrar(
-  db: Awaited<ReturnType<typeof admin>>,
-  actor: { id: string; email: string; nombre: string },
-  accion: string,
-  elemento?: string,
-) {
-  await db.from("historial_actividad").insert({
-    user_id: actor.id,
-    email: actor.email,
-    nombre: actor.nombre,
-    accion,
-    elemento: elemento ?? null,
-  });
-}
 
 export const listarEmpleados = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
