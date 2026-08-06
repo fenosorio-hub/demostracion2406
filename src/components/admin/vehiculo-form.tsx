@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { ImagenesUploader } from "@/components/admin/imagenes-uploader";
-import { registrarActividad } from "@/lib/permisos";
+import { registrarActividad } from "@/lib/cuenta";
 import {
   actualizarVehiculo,
   crearVehiculo,
