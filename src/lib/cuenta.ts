@@ -55,8 +55,8 @@ export function useCuenta() {
 export async function registrarActividad(accion: string, elemento?: string, detalle?: string) {
   const { error } = await supabase.rpc("registrar_actividad", {
     _accion: accion,
-    _elemento: elemento ?? undefined,
-    _detalle: detalle ?? undefined,
+    ...(elemento ? { _elemento: elemento } : {}),
+    ...(detalle ? { _detalle: detalle } : {}),
   });
   if (error) console.error("[historial]", error.message);
 }
