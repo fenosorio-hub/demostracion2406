@@ -109,6 +109,35 @@ export const eliminarEmpleado = createServerFn({ method: "POST" })
   });
 
 /** Crea la cuenta de administrador principal si todavía no existe. Idempotente. */
+export const registrarActividadServer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { accion: string; elemento?: string | undefined; detalle?: string | undefined }) => ({
+    accion: String(input.accion).slice(0, 120),
+    elemento: input.elemento ? String(input.elemento).slice(0, 200) : undefined,
+    detalle: input.detalle ? String(input.detalle).slice(0, 500) : undefined,
+  }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: rol } = await db
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (rol?.role !== "admin" && rol?.role !== "empleado") return { ok: false };
+    const { data: perfil } = await db
+      .from("perfiles")
+      .select("email,nombre")
+      .eq("id", context.userId)
+      .maybeSingle();
+    await registrar(
+      db,
+      { id: context.userId, email: perfil?.email ?? "", nombre: perfil?.nombre ?? "" },
+      data.accion,
+      data.elemento,
+    );
+    return { ok: true };
+  });
+
 export const asegurarAdminPorDefecto = createServerFn({ method: "POST" }).handler(async () => {
   const db = await admin();
   const { data: lista } = await db.auth.admin.listUsers({ page: 1, perPage: 200 });

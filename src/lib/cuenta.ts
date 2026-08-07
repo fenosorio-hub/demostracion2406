@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
-import { sincronizarCuenta } from "./staff.functions";
+import { registrarActividadServer, sincronizarCuenta } from "./staff.functions";
 import type { CuentaDTO, Rol } from "./staff-shared";
 
 export type { CuentaDTO, Rol };
@@ -54,12 +54,11 @@ export function useCuenta() {
 }
 
 export async function registrarActividad(accion: string, elemento?: string, detalle?: string) {
-  const { error } = await supabase.rpc("registrar_actividad", {
-    _accion: accion,
-    ...(elemento ? { _elemento: elemento } : {}),
-    ...(detalle ? { _detalle: detalle } : {}),
-  });
-  if (error) console.error("[historial]", error.message);
+  try {
+    await registrarActividadServer({ data: { accion, elemento, detalle } });
+  } catch {
+    /* el registro de auditoría no debe interrumpir la operación del usuario */
+  }
 }
 
 export async function cerrarSesion() {
