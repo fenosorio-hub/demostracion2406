@@ -111,7 +111,7 @@ export const eliminarEmpleado = createServerFn({ method: "POST" })
 /** Crea la cuenta de administrador principal si todavía no existe. Idempotente. */
 export const registrarActividadServer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { accion: string; elemento?: string; detalle?: string }) => ({
+  .inputValidator((input: { accion: string; elemento?: string | undefined; detalle?: string | undefined }) => ({
     accion: String(input.accion).slice(0, 120),
     elemento: input.elemento ? String(input.elemento).slice(0, 200) : undefined,
     detalle: input.detalle ? String(input.detalle).slice(0, 500) : undefined,
